@@ -1,0 +1,1 @@
+- Change the project from just QR generate to both generate and read (run with a flag to scan the QR code from clipboard)
