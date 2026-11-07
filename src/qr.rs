@@ -1,34 +1,11 @@
 use std::io::Cursor;
-use std::io::Write;
-use std::fs::File;
 use qrcode::QrCode;
-use image::{Luma, ImageFormat};
-use std::path::PathBuf;
+use image::{Luma, ImageFormat, ImageReader};
+use rqrr::PreparedImage;
 
-#[derive(Debug, Clone)]
-pub struct PngImage(Vec<u8>);
+use crate::image::PngImage;
 
-impl PngImage {
-    pub fn save(&self, file_path: impl Into<PathBuf>) -> anyhow::Result<()> {
-        let file_path = file_path.into();
-        let mut f = File::create(file_path)?;
-        f.write_all(&self.0)?;
-
-        Ok(())
-    }
-
-    pub fn into_inner(self) -> Vec<u8> {
-        self.0
-    }
-}
-
-impl From<Cursor<Vec<u8>>> for PngImage {
-    fn from(value: Cursor<Vec<u8>>) -> Self {
-        PngImage(value.into_inner())
-    }
-}
-
-pub fn encode_qr(data: &[u8]) -> anyhow::Result<PngImage> {
+pub fn encode_qr(data: &str) -> anyhow::Result<PngImage> {
     let code = QrCode::new(data)?;
     let image = code.render::<Luma<u8>>().build();
 
@@ -36,4 +13,17 @@ pub fn encode_qr(data: &[u8]) -> anyhow::Result<PngImage> {
     image.write_to(&mut bytes, ImageFormat::Png)?;
 
     Ok(bytes.into())
+}
+
+pub fn decode_qr(image: PngImage) -> anyhow::Result<Vec<String>> {
+    let img = image::load_from_memory(&image.into_inner())?;
+    let mut preprared = PreparedImage::prepare(img.to_luma8());
+    let grids = preprared.detect_grids();
+
+    Ok(grids
+        .iter()
+        .filter_map(|grid| grid.decode().ok())
+        .map(|(_, content)| { content })
+        .collect::<Vec<_>>()
+    )
 }

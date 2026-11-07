@@ -1,6 +1,9 @@
 use clap::Parser;
-use qr_gen::qr::encode_qr;
-use qr_gen::clipboard::copy_image_to_clipboard;
+use qr_gen::qr::{encode_qr, decode_qr};
+use qr_gen::clipboard::{
+    copy_image_to_clipboard,
+    retrieve_image_from_clipboard
+};
 
 #[derive(Parser, Debug)]
 #[command(version, about = "Generate QR code quickly")]
@@ -19,7 +22,7 @@ fn main() {
 
     if !args.scan {
         let data = args.data.join(" ");
-        let png = match encode_qr(data.as_bytes()) {
+        let png = match encode_qr(&data) {
             Ok(img) => img,
             Err(e) => {
                 panic!("Error: {}", e);
@@ -35,9 +38,27 @@ fn main() {
         }
 
         println!("QR code copied to clipboard and saved to code.png!");
-    } else {
-        todo!("Implement scan functionality")
-    }
 
+    } else {
+        let img = match retrieve_image_from_clipboard() {
+            Ok(img) => img,
+            Err(e) => {
+                panic!("Error: {}", e);
+            }
+        };
+
+        let results = match decode_qr(img) {
+            Ok(res) => res,
+            Err(e) => {
+                panic!("Error: {}", e);
+            }
+        };
+
+        println!("Detected {} QR(s)", results.len());
+
+        for (index, data) in results.iter().enumerate() {
+            println!("{}: {}", index + 1, data);
+        }
+    }
 
 }
