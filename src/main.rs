@@ -1,3 +1,4 @@
+use std::process::ExitCode;
 use clap::Parser;
 use qr_gen::qr::{encode_qr, decode_qr};
 use qr_gen::clipboard::{
@@ -17,7 +18,7 @@ struct Cli {
     data: Vec<String>
 }
 
-fn main() {
+fn main() -> ExitCode {
     let args = Cli::parse();
 
     if !args.scan {
@@ -25,16 +26,19 @@ fn main() {
         let png = match encode_qr(&data) {
             Ok(img) => img,
             Err(e) => {
-                panic!("Error: {}", e);
+                eprintln!("ERROR: {}", e);
+                return ExitCode::FAILURE;
             }
         };
 
         if let Err(e) = png.save("code.png") {
-            panic!("Error: {}", e);
+            eprintln!("ERROR: {}", e);
+            return ExitCode::FAILURE;
         }
 
         if let Err(e) = copy_image_to_clipboard(png) {
-            panic!("Error: {}", e);
+            eprintln!("ERROR: {}", e);
+            return ExitCode::FAILURE;
         }
 
         println!("QR code copied to clipboard and saved to code.png!");
@@ -43,14 +47,16 @@ fn main() {
         let img = match retrieve_image_from_clipboard() {
             Ok(img) => img,
             Err(e) => {
-                panic!("Error: {}", e);
+                eprintln!("ERROR: {}", e);
+                return ExitCode::FAILURE;
             }
         };
 
         let results = match decode_qr(img) {
             Ok(res) => res,
             Err(e) => {
-                panic!("Error: {}", e);
+                eprintln!("ERROR: {}", e);
+                return ExitCode::FAILURE;
             }
         };
 
@@ -59,6 +65,8 @@ fn main() {
         for (index, data) in results.iter().enumerate() {
             println!("{}: {}", index + 1, data);
         }
+
     }
 
+    return ExitCode::SUCCESS;
 }
