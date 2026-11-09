@@ -1,7 +1,9 @@
 [package]
-name = "qr-gen"
+name = "qr-utils"
+description = "QR tools to use in the CLI"
 version = "0.1.0"
 edition = "2024"
+license = "MIT"
 
 [dependencies]
 anyhow = "1.0.104"

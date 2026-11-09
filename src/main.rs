@@ -2,8 +2,8 @@ use std::process::ExitCode;
 use std::time::{SystemTime, UNIX_EPOCH};
 use std::path::PathBuf;
 use clap::Parser;
-use qr_gen::qr::{encode_qr, decode_qr};
-use qr_gen::clipboard::{
+use qr_utils::qr::{encode_qr, decode_qr};
+use qr_utils::clipboard::{
     copy_image_to_clipboard,
     retrieve_image_from_clipboard
 };

@@ -857,7 +857,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "qr-gen"
+name = "qr-utils"
 version = "0.1.0"
 dependencies = [
  "anyhow",
