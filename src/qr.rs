@@ -1,6 +1,6 @@
 use std::io::Cursor;
 use qrcode::QrCode;
-use image::{Luma, ImageFormat, ImageReader};
+use image::{Luma, ImageFormat};
 use rqrr::PreparedImage;
 
 use crate::image::PngImage;
